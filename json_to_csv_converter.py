@@ -494,7 +494,8 @@ def process_json_file(file_path: str, known_records: Optional[Dict[str, bool]] =
 
                 # Log file size and first 100 characters
                 logger.info(f"  File size: {len(file_content)} bytes")
-                logger.info(f"  File preview: {file_content[:100].replace('\n', ' ')}...")
+                preview_text = file_content[:100].replace('\n', ' ')
+                logger.info(f"  File preview: {preview_text}...")
 
                 # Parse JSON
                 json_data = json.loads(file_content)
