@@ -96,7 +96,9 @@ def convert():
 
                 # Log file info
                 logger.info(f"Uploaded file: {file.filename}, size: {len(file_content)} bytes")
-                logger.info(f"Preview: {file_content[:100].decode('utf-8', errors='ignore').replace('\n', ' ')}...")
+                preview_text = file_content[:100].decode('utf-8', errors='ignore')
+                preview_text = preview_text.replace('\n', ' ')
+                logger.info(f"Preview: {preview_text}...")
 
                 # Save the file
                 filename = secure_filename(file.filename)
