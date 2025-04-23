@@ -1,0 +1,11 @@
+{
+  "id": "67890",
+  "name": "Ceramic Floor Tile",
+  "sku": "CFT-200",
+  "details": "Durable ceramic floor tile for kitchens and bathrooms",
+  "unit_price": 15.99,
+  "unit": "sq ft",
+  "product_type": "Tile",
+  "manufacturer": "TileMaster",
+  "product_url": "https://example.com/products/67890"
+}

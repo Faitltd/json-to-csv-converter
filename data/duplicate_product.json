@@ -1,0 +1,11 @@
+{
+  "productId": "12345",
+  "title": "Premium Hardwood Flooring",
+  "model": "HW-100",
+  "description": "High-quality hardwood flooring for residential use",
+  "price": "$29.99",
+  "category": "Flooring",
+  "brand": "WoodCraft",
+  "url": "https://example.com/products/12345",
+  "material": "Oak"
+}

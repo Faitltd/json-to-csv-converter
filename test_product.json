@@ -1,0 +1,12 @@
+{
+  "product": {
+    "item_id": "12345",
+    "title": "Test Product",
+    "description": "This is a test product description",
+    "model_number": "TEST-123",
+    "brand": "Test Brand",
+    "buybox_winner": {
+      "price": 99.99
+    }
+  }
+}

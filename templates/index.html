@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON to CSV Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #d32f2f;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+            border-left: 4px solid #d32f2f;
+        }
+        .success {
+            color: #388e3c;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            border-left: 4px solid #388e3c;
+        }
+        .instructions {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .stats-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            display: none;
+        }
+        .stats-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .stats-item {
+            margin-bottom: 5px;
+        }
+        .download-btn {
+            background-color: #2196f3;
+            margin-top: 15px;
+        }
+        .download-btn:hover {
+            background-color: #0b7dda;
+        }
+        .hidden {
+            display: none;
+        }
+        #file-count {
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JSON to CSV Converter</h1>
+
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Select one or more JSON files to convert (supports 100+ files)</li>
+                <li>Enter a name for the output CSV file (optional)</li>
+                <li>Click "Convert to CSV" to process the files</li>
+                <li>Wait for the conversion to complete</li>
+                <li>Download the converted CSV file</li>
+            </ol>
+            <p style="margin-top: 10px;">
+                <a href="/test-download" style="color: #2196f3;">Download a test CSV file</a> to verify that your spreadsheet application can correctly open CSV files with all headers.
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="error">
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+
+        <div id="error-container" class="error hidden">
+            <p id="error-message"></p>
+        </div>
+
+        <div id="success-container" class="success hidden">
+            <p id="success-message"></p>
+        </div>
+
+        <form id="convert-form" action="/convert" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="json_files">Select JSON Files:</label>
+                <input type="file" id="json_files" name="json_files" accept=".json" multiple required>
+                <div id="file-count"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="output_filename">Output CSV Filename (optional):</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="text" id="output_filename" name="output_filename" placeholder="output" style="flex: 1;">
+                    <span style="margin-left: 5px; color: #666;">.csv</span>
+                </div>
+                <small style="color: #666;">The .csv extension will be added automatically</small>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <div style="display: flex; align-items: center;">
+                    <input type="checkbox" id="skip_duplicates" name="skip_duplicates" value="true" checked style="margin-right: 10px;">
+                    <label for="skip_duplicates">Skip duplicate records</label>
+                </div>
+                <small style="color: #666;">Prevents duplicate records from being included in the output file</small>
+            </div>
+
+            <button type="submit" id="convert-btn">Convert to CSV</button>
+        </form>
+
+        <div id="progress-container" class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+            <div class="progress-text" id="progress-text">Processing...</div>
+        </div>
+
+        <div id="stats-container" class="stats-container">
+            <div class="stats-title">Conversion Statistics:</div>
+            <div class="stats-item">Files processed: <span id="files-processed">0</span></div>
+            <div class="stats-item">Records processed: <span id="records-processed">0</span></div>
+            <div class="stats-item">Duplicates skipped: <span id="duplicates-skipped">0</span></div>
+            <div class="stats-item">Files with errors: <span id="files-with-errors">0</span></div>
+            <div class="stats-item">Processing time: <span id="processing-time">0</span> seconds</div>
+            <button id="download-btn" class="download-btn">Download CSV</button>
+        </div>
+    </div>
+
+    <script>
+        // Show file count when files are selected
+        document.getElementById('json_files').addEventListener('change', function(e) {
+            const fileCount = e.target.files.length;
+            document.getElementById('file-count').textContent = fileCount + ' file(s) selected';
+        });
+
+        // Handle form submission
+        document.getElementById('convert-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Reset UI
+            document.getElementById('error-container').classList.add('hidden');
+            document.getElementById('success-container').classList.add('hidden');
+            document.getElementById('stats-container').style.display = 'none';
+
+            // Show progress container
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-text').textContent = 'Starting conversion...';
+
+            // Disable submit button
+            document.getElementById('convert-btn').disabled = true;
+
+            // Submit form via AJAX
+            const formData = new FormData(this);
+
+            fetch('/convert', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    showError(data.message);
+                    return;
+                }
+
+                // Start polling for status updates
+                const taskId = data.task_id;
+                pollStatus(taskId);
+            })
+            .catch(error => {
+                showError('Error starting conversion: ' + error.message);
+            });
+        });
+
+        // Poll for status updates
+        function pollStatus(taskId) {
+            const statusUrl = '/status/' + taskId;
+
+            fetch(statusUrl)
+            .then(response => response.json())
+            .then(data => {
+                // Update progress
+                const progress = data.progress / data.total * 100;
+                document.getElementById('progress-bar').style.width = progress + '%';
+                document.getElementById('progress-text').textContent = data.message;
+
+                if (data.status === 'completed') {
+                    // Show success message
+                    showSuccess('Conversion completed successfully!');
+
+                    // Show statistics
+                    document.getElementById('stats-container').style.display = 'block';
+                    document.getElementById('files-processed').textContent = data.stats.files_processed;
+                    document.getElementById('records-processed').textContent = data.stats.records_processed;
+                    document.getElementById('duplicates-skipped').textContent = data.stats.duplicates_skipped || 0;
+                    document.getElementById('files-with-errors').textContent = data.stats.files_with_errors;
+                    document.getElementById('processing-time').textContent = data.stats.elapsed_time.toFixed(2);
+
+                    // Set up download button
+                    document.getElementById('download-btn').onclick = function() {
+                        window.location.href = '/download/' + taskId;
+                    };
+
+                    // Re-enable submit button
+                    document.getElementById('convert-btn').disabled = false;
+                } else if (data.status === 'error') {
+                    showError('Error during conversion: ' + data.error);
+                    document.getElementById('convert-btn').disabled = false;
+                } else {
+                    // Continue polling
+                    setTimeout(function() {
+                        pollStatus(taskId);
+                    }, 1000);
+                }
+            })
+            .catch(error => {
+                showError('Error checking status: ' + error.message);
+                document.getElementById('convert-btn').disabled = false;
+            });
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            const errorMessage = document.getElementById('error-message');
+
+            errorMessage.textContent = message;
+            errorContainer.classList.remove('hidden');
+            document.getElementById('progress-container').style.display = 'none';
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successContainer = document.getElementById('success-container');
+            const successMessage = document.getElementById('success-message');
+
+            successMessage.textContent = message;
+            successContainer.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

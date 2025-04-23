@@ -1,0 +1,6 @@
+﻿Item ID,Item Name,SKU,Description,Rate,Source,Reference ID,Usage unit,Purchase Rate,Purchase Account,Vendor,Item Type,Is Combo Product,CF.Manufacturer,CF.URL,CF.Markup,CF.Description,CF.Supplier,CF.Material,CF.Cost
+,,,,,,,,,,,,,,,,,,,
+67890,Ceramic Floor Tile,CFT-200,Durable ceramic floor tile for kitchens and bathrooms,15.99,HD,,sq ft,,HD,HD,Tile,,TileMaster,https://example.com/products/67890,43%,Durable ceramic floor tile for kitchens and bathrooms,HD,,
+,John,,,,HD,,,,HD,HD,,,,,43%,,HD,,
+,Jane,,,,HD,,,,HD,HD,,,,,43%,,HD,,
+12345,Premium Hardwood Flooring,HW-100,High-quality hardwood flooring for residential use,29.99,HD,,,29.99,HD,HD,Flooring,,WoodCraft,https://example.com/products/12345,43%,High-quality hardwood flooring for residential use,HD,Oak,29.99
